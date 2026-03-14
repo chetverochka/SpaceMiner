@@ -19,6 +19,9 @@
     <ClCompile Include="..\Classes\PlayLayer.cpp">
       <Filter>Source Files\Classes</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\ObjectEventDelegate.cpp">
+      <Filter>Source Files\Classes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="D:\projectscpp\cocos2d\SpaceMiner\Classes\AppDelegate.h">
@@ -55,6 +58,9 @@
       <Filter>Source Files\Classes</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\PlayLayer.h">
+      <Filter>Source Files\Classes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\ObjectEventDelegate.h">
       <Filter>Source Files\Classes</Filter>
     </ClInclude>
   </ItemGroup>
