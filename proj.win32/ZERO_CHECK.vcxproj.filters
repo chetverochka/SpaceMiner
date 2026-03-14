@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="D:\projectscpp\cocos2d\SpaceMiner\proj.win32\CMakeFiles\513f35909c1589fe99b01d6f3d4cd35d\generate.stamp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{2BF9C7BB-4C75-35A0-8CE6-99796F7D5655}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

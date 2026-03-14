@@ -1,0 +1,10 @@
+^D:\PROJECTSCPP\COCOS2D\SPACEMINER\PROJ.WIN32\CMAKEFILES\513F35909C1589FE99B01D6F3D4CD35D\GENERATE.STAMP.RULE
+setlocal
+C:\Users\user\AppData\Local\Android\Sdk\cmake\3.30.3\bin\cmake.exe -SD:/projectscpp/cocos2d/SpaceMiner -BD:/projectscpp/cocos2d/SpaceMiner/proj.win32 --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file D:/projectscpp/cocos2d/SpaceMiner/proj.win32/SpaceMiner.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
