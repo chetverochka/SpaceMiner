@@ -7,12 +7,13 @@ class ObjectEventDelegate;
 
 class GameObject : public cocos2d::CCSprite {
 public:
+	static ObjectEventDelegate ms_safeEventDelegate;
 	CREATE_FUNC(GameObject);
 
 	GameObject();
 private:
 	ObjectEventDelegate* m_eventDelegate;
-	std::pair<int, int> m_cell;
+	int m_cellX, m_cellY;
 };
 
 #endif //!__GAME_OBJECT_H__

@@ -1,8 +1,13 @@
 #include "GameObject.h"
+#include "ObjectEventDelegate.h"
+
+ObjectEventDelegate GameObject::ms_safeEventDelegate = ObjectEventDelegate();
+
 
 GameObject::GameObject() :
-	  m_eventDelegate(NULL)
-	, m_cell({0,0})
+	  m_eventDelegate(&ms_safeEventDelegate)
+	, m_cellX(0)
+	, m_cellY(0)
 {
 
 }
