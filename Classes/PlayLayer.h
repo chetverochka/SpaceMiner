@@ -22,6 +22,8 @@ public:
 	void addObject(GameObject* object);
 	void removeObject(GameObject* object);
 protected:
+	virtual void ccKeyPressed(cocos2d::EventKeyboard::KeyCode key, cocos2d::Event* event);
+	virtual void ccKeyReleased(cocos2d::EventKeyboard::KeyCode key, cocos2d::Event* event);
 private:
 	ChunkMap m_chunkMap;
 	cocos2d::Vector<GameObject*> m_allObjects;

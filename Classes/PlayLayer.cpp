@@ -14,6 +14,11 @@ bool PlayLayer::init(){
 		return false;
 	}
 
+	EventListenerKeyboard* keyboardListener = EventListenerKeyboard::create();
+	keyboardListener->onKeyPressed = CC_CALLBACK_2(PlayLayer::ccKeyPressed, this);
+	keyboardListener->onKeyReleased = CC_CALLBACK_2(PlayLayer::ccKeyReleased, this);
+	_eventDispatcher->addEventListenerWithSceneGraphPriority(keyboardListener, this);
+
 	m_player = PlayerObject::create();
 	addObject(m_player);
 
@@ -61,4 +66,31 @@ void PlayLayer::removeObject(GameObject* object) {
 	if (object->getParent() == this) {
 		object->removeFromParent();
 	}
+}
+
+void PlayLayer::ccKeyPressed(EventKeyboard::KeyCode key, Event* event) {
+	event->stopPropagation();
+	typedef EventKeyboard::KeyCode Key;
+	switch (key) {
+	default:
+		break;
+	case Key::KEY_W:
+		m_player->smoothMove(0, 1);
+		break;
+	case Key::KEY_A:
+		m_player->smoothMove(-1, 0);
+		break;
+	case Key::KEY_S:
+		m_player->smoothMove(0, -1);
+		break;
+	case Key::KEY_D:
+		m_player->smoothMove(1, 0);
+		break;
+	}
+}
+
+void PlayLayer::ccKeyReleased(EventKeyboard::KeyCode key, Event* event) {
+	event->stopPropagation();
+	typedef EventKeyboard::KeyCode Key;
+
 }
