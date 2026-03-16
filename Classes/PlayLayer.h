@@ -3,8 +3,10 @@
 
 #include "cocos2d.h"
 #include "ObjectEventDelegate.h"
+#include "ChunkMap.h"
 
 class GameObject;
+class PlayerObject;
 
 class PlayLayer : public cocos2d::CCLayer, public ObjectEventDelegate {
 public:
@@ -21,7 +23,9 @@ public:
 	void removeObject(GameObject* object);
 protected:
 private:
+	ChunkMap m_chunkMap;
 	cocos2d::Vector<GameObject*> m_allObjects;
+	PlayerObject* m_player;
 };
 
 #endif //!__PLAY_LAYER_H__

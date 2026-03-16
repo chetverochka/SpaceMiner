@@ -1,5 +1,7 @@
 #include "PlayLayer.h"
 #include "GameObject.h"
+#include "ChunkMap.h"
+#include "PlayerObject.h"
 
 USING_NS_CC;
 
@@ -11,6 +13,9 @@ bool PlayLayer::init(){
 	if (!Layer::init()) {
 		return false;
 	}
+
+	m_player = PlayerObject::create();
+	addObject(m_player);
 
 	return true;
 }

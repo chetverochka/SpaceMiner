@@ -4,6 +4,7 @@
 class GameObject;
 
 class ObjectEventDelegate {
+public:
 	virtual void onObjectCellMoved(GameObject* target, int destinationX, int destinationY) {}
 };
 
