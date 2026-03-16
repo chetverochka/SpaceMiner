@@ -6,18 +6,29 @@
 USING_NS_CC;
 
 PlayLayer::PlayLayer()
-
+	: m_chunkMap(NULL) // cocos2d-x ruins RAII and i love it lol
 {}
+
+PlayLayer::~PlayLayer() {
+	if (m_chunkMap) {
+		delete m_chunkMap;
+		m_chunkMap = NULL;
+	}
+}
 
 bool PlayLayer::init(){
 	if (!Layer::init()) {
 		return false;
 	}
 
+	// listeners block
 	EventListenerKeyboard* keyboardListener = EventListenerKeyboard::create();
 	keyboardListener->onKeyPressed = CC_CALLBACK_2(PlayLayer::ccKeyPressed, this);
 	keyboardListener->onKeyReleased = CC_CALLBACK_2(PlayLayer::ccKeyReleased, this);
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(keyboardListener, this);
+	// end listeners block
+
+	m_chunkMap = new ChunkMap();
 
 	m_player = PlayerObject::create();
 	addObject(m_player);
@@ -70,23 +81,32 @@ void PlayLayer::removeObject(GameObject* object) {
 
 void PlayLayer::ccKeyPressed(EventKeyboard::KeyCode key, Event* event) {
 	event->stopPropagation();
+
+	int targetMoveDirX = 0, targetMoveDirY = 0;
+
 	typedef EventKeyboard::KeyCode Key;
 	switch (key) {
 	default:
 		break;
 	case Key::KEY_W:
-		m_player->smoothMove(0, 1);
+		targetMoveDirY = 1;
 		break;
 	case Key::KEY_A:
-		m_player->smoothMove(-1, 0);
+		targetMoveDirX = -1;
 		break;
 	case Key::KEY_S:
-		m_player->smoothMove(0, -1);
+		targetMoveDirY = -1;
 		break;
 	case Key::KEY_D:
-		m_player->smoothMove(1, 0);
+		targetMoveDirX = 1;
 		break;
 	}
+
+	m_player->smoothMove(targetMoveDirX, targetMoveDirY);
+
+	CCVec2i playerCell(m_player->getCellX(), m_player->getCellY());
+	CCVec2i chunkIndex(m_chunkMap->getChunkCoords(playerCell));
+	CCLOG("Chunk coords for position (%i, %i) = %i, %i;", playerCell.x, playerCell.y, chunkIndex.x, chunkIndex.y);
 }
 
 void PlayLayer::ccKeyReleased(EventKeyboard::KeyCode key, Event* event) {

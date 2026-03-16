@@ -2,15 +2,22 @@
 #define __CHUNK_MAP_H__
 
 #include <vector>
+#include "CCVec2i.h"
 
 // «адел на будущее
+/*
+ChunkMap расчитана на универсальное использование в других проектах. 
+ѕоэтому ниже готова€ система позвол€юща€ интегрировать расчЄт чанков во все игры где это нужно.
+ѕросто наследуйте ќбъекты и от ChunkObjectDelegate и добавл€йте их в ChunkMap дл€ работы с ними
+*/
+
 
 /*
 ChunkObjectDelegate это интерфейс предоставл€ющий методы дл€ работы с сеткой чанков
 */
 class ChunkObjectDelegate {
-	//TODO: переименовать, сделать так чтобы GameObject наследовалс€ от него, вынести в отдельный hpp файл
-
+	//TODO: переименовать, сделать так чтобы GameObject наследовалс€ от него, вынести в отдельный hpp файл (completed)
+public:
 	virtual void setCellX(int x) = 0;
 	virtual void setCellY(int y) = 0;
 	
@@ -24,17 +31,57 @@ class ChunkObjectDelegate {
 
 class ChunkMap {
 public:
+	ChunkMap();
+	ChunkMap(int cellsCountX, int cellsCountY);
+	ChunkMap(const cocos2d::CCVec2i& cellsCount);
+
+	cocos2d::CCVec2i getCellsCount() const;
+
+	/*
+	¬ыдаЄт индекс (координаты) чанка по глобальным координатам €чейки. Ќапример:
+	„анк содержит сетку €чеек 12х12
+	√лобальна€ координата €чейки: (13, 6)
+
+	-> ѕодход€щий чанк дл€ этой €чейки будет под индексом: (1, 0)
+	*/
+	cocos2d::CCVec2i getChunkCoords(const cocos2d::CCVec2i& globalCellCoords) const;
+
+	/*
+	 онвертирует глобальные координаты €чейки в 
+	локальные координаты относител€ координат чанка с заданным индексом (координатами)
+	*/
+	cocos2d::CCVec2i convertGlobalToLocal(const cocos2d::CCVec2i& globalCellCoords, const cocos2d::CCVec2i& chunkCoords) const;
+
+	/*
+	 онвертирует локальные координаты €чейки в 
+	глобальные относительно чанка с заданным индексом (координатами)
+	*/
+	cocos2d::CCVec2i convertLocalToGlobal(const cocos2d::CCVec2i& localCellCoords, const cocos2d::CCVec2i& chunkCoords) const;
 	
+	bool contains(ChunkObjectDelegate* object) const;
+	void add(ChunkObjectDelegate* object);
+	void remove(ChunkObjectDelegate* object);
+	void clear();
+
+	void updateObject(std::vector<ChunkObjectDelegate*>& range); // base method for updaing object calculations in chunk
+	void updateObject(ChunkObjectDelegate* object); 
+	void updateAllObjects(); // all objects
+
+	cocos2d::CCVec2i getObjectChunk(ChunkObjectDelegate* object) const;
+
+	std::vector<ChunkObjectDelegate*> getObjects();
+	std::vector<ChunkObjectDelegate*> getObjects(const cocos2d::CCVec2i& chunkCoords);
 private:
-	// отказатьс€ от CHUNK и сделать ChunkMap единственной точкой обработки и получени€ данных
-	/*class Chunk {
-	public:
-		int posX, posY;
+	struct Chunk { // internal structure (container)
+		cocos2d::CCVec2i position;
 		std::vector<ChunkObjectDelegate*> objects;
-	};*/
-	// cellStepX, cellStepY: размер €чеек внутри чанков (не размер единичной €чейки)
-	// std::vector<IChunkMapObject>
-	// std::vector<Chunk> ...
+	};
+
+	Chunk* getChunkAt(const cocos2d::CCVec2i& chunkCoords);
+
+	std::vector<ChunkObjectDelegate*> m_objects;
+	cocos2d::CCVec2i m_cellsCount; // cells count per ONE chunk
+	std::vector<Chunk> m_chunks;
 };
 
 

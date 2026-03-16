@@ -31,6 +31,9 @@
     <ClCompile Include="..\Classes\PlayerObject.cpp">
       <Filter>Source Files\Classes</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\CCVec2i.cpp">
+      <Filter>Source Files\Classes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="D:\projectscpp\cocos2d\SpaceMiner\Classes\AppDelegate.h">
@@ -79,6 +82,9 @@
       <Filter>Source Files\Classes</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\PlayerObject.h">
+      <Filter>Source Files\Classes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\CCVec2i.h">
       <Filter>Source Files\Classes</Filter>
     </ClInclude>
   </ItemGroup>

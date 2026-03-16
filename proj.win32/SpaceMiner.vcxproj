@@ -637,6 +637,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Classes\CCVec2i.h" />
     <ClInclude Include="..\Classes\ChunkMap.h" />
     <ClInclude Include="..\Classes\DirtObject.h" />
     <ClInclude Include="..\Classes\GameObject.h" />
@@ -647,6 +648,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClInclude Include="D:\projectscpp\cocos2d\SpaceMiner\Classes\AppDelegate.h" />
     <ClInclude Include="D:\projectscpp\cocos2d\SpaceMiner\proj.win32\main.h" />
     <ClInclude Include="D:\projectscpp\cocos2d\SpaceMiner\proj.win32\resource.h" />
+    <ClCompile Include="..\Classes\CCVec2i.cpp" />
     <ClCompile Include="..\Classes\ChunkMap.cpp" />
     <ClCompile Include="..\Classes\DirtObject.cpp" />
     <ClCompile Include="..\Classes\GameObject.cpp" />
