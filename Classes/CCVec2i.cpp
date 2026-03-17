@@ -12,3 +12,7 @@ CCVec2i::CCVec2i(const CCVec2i& copyObj) : x(copyObj.x), y(copyObj.y) {}
 bool CCVec2i::operator==(const CCVec2i& comparable) const {
 	return x == comparable.x && y == comparable.y;
 }
+
+bool CCVec2i::operator!=(const CCVec2i& comparable) const {
+	return x != comparable.x || y != comparable.y;
+}

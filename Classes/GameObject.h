@@ -24,6 +24,9 @@ public:
 	int getCellX() const override;
 	int getCellY() const override;
 	void getCell(int* x, int* y) const override;
+
+	void addEventListener(ObjectEventDelegate* listener);
+	void removeEventListener();
 private:
 	void updatePosition();
 

@@ -78,46 +78,57 @@ void ChunkMap::clear() {
 }
 
 void ChunkMap::updateObject(std::vector<ChunkObjectDelegate*>& range) {
-	CCAssert(false, "IMPLEMENT ME");
+	//CCAssert(false, "IMPLEMENT ME");
 
 	for (int i = 0; i < range.size(); i++) {
 		ChunkObjectDelegate* object = range[i];
 
 		const CCVec2i objectCell(object->getCellX(), object->getCellY());
-		const CCVec2i newChunkPos = getChunkCoords(objectCell);
+		const CCVec2i newChunkPos(getChunkCoords(objectCell));
 		
-		const bool objectHasChunk = m_chunkToObject[object];
-		const bool newChunkExists = getChunkAt(newChunkPos);
+		const bool objectInChunk = m_chunkToObject.count(object) > 0;
 
-		if (objectHasChunk) {
+		if (objectInChunk) {
 			Chunk* oldChunk = m_chunkToObject[object];
-			if (oldChunk->position == newChunkPos) { // если чанки совпадают то ничего не делаем
+
+			if (oldChunk->position == newChunkPos) {
 				continue;
 			}
-
-			for (int i = 0; i < oldChunk->objects.size(); i++) { // удаляем текущий объект из чанка
-				if (oldChunk->objects[i] == object) {
-					oldChunk->objects.erase(i + oldChunk->objects.begin());
-					break;
-				}
-			}
-
-			if (oldChunk->objects.empty()) { // удаляем чанк если чанк пустой
-				for (int i = 0; i < m_chunks.size(); i++) {
-					if (&m_chunks[i] == oldChunk) {
-						m_chunks.erase(i + m_chunks.begin());
+			else {
+				// delete this object from chunk
+				m_chunkToObject.erase(object);
+				for (int i = 0; i < oldChunk->objects.size(); i++) { 
+					if (oldChunk->objects.at(i) == object) {
+						oldChunk->objects.erase(oldChunk->objects.begin() + i);
 						break;
 					}
 				}
-			}
 
-			if (!newChunkExists) {
-				m_chunks.push_back(Chunk());
-				Chunk* newChunk = &m_chunks.back();
-				/// IMPLEMENT ME
-				CCAssert(false, "IMPLEMENT ME");
+				// if chunk is empty delete chunk
+				if (oldChunk->objects.empty()) {
+					for (int i = 0; i < m_chunks.size(); i++) {
+						if (m_chunks[i] == oldChunk) {
+							m_chunks.erase(m_chunks.begin() + i);
+
+							delete oldChunk;
+
+							break;
+						}
+					}
+				}
 			}
 		}
+
+		Chunk* newChunk = getChunkAt(newChunkPos);
+		if (!newChunk) {
+			Chunk* chunk = new Chunk();
+			chunk->position = newChunkPos;
+			m_chunks.push_back(chunk);
+			newChunk = m_chunks.back();
+		}
+
+		newChunk->objects.push_back(object);
+		m_chunkToObject[object] = newChunk;
 	}
 }
 
@@ -150,20 +161,20 @@ std::vector<ChunkObjectDelegate*> ChunkMap::getObjects(const CCVec2i& chunkCoord
 
 std::vector<CCVec2i> ChunkMap::getChunks() const {
 	std::vector<CCVec2i> ret;
-	for (const ChunkMap::Chunk& chunk : m_chunks) {
-		ret.push_back(chunk.position);
+	for (const ChunkMap::Chunk* chunk : m_chunks) {
+		ret.push_back(chunk->position);
 	}
 	return ret;
 }
 
 ChunkMap::Chunk* ChunkMap::getChunkAt(const CCVec2i& chunkCoords) {
 	for (int i = 0; i < m_chunks.size(); i++) {
-		Chunk& chunk = m_chunks[i];
+		Chunk* chunk = m_chunks[i];
 		if (
-			chunk.position.x == chunkCoords.x && 
-			chunk.position.y == chunkCoords.y
+			chunk->position.x == chunkCoords.x && 
+			chunk->position.y == chunkCoords.y
 		) {
-			return &chunk;
+			return chunk;
 		}
 	}
 	return NULL;

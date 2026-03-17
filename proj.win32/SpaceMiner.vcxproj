@@ -78,6 +78,7 @@
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;COCOS2D_DEBUG=1;_WIN32;UNICODE;_UNICODE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;CC_STATIC;LWS_WITH_LIBUV;CMAKE_INTDIR="Debug"</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+      <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;COCOS2D_DEBUG=1;_WIN32;UNICODE;_UNICODE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;CC_STATIC;LWS_WITH_LIBUV;CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
@@ -354,6 +355,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <DebugInformationFormat>
       </DebugInformationFormat>
       <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+      <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_WIN32;UNICODE;_UNICODE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;CC_STATIC;LWS_WITH_LIBUV;CMAKE_INTDIR=\"Release\"</PreprocessorDefinitions>

@@ -76,3 +76,11 @@ void GameObject::updatePosition() {
 		m_eventDelegate->onObjectCellMoved(this, m_cellX, m_cellY);
 	}
 }
+
+void GameObject::addEventListener(ObjectEventDelegate* listener) {
+	m_eventDelegate = listener;
+}
+
+void GameObject::removeEventListener() {
+	m_eventDelegate = NULL;
+}

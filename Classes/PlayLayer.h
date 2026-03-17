@@ -22,6 +22,7 @@ public:
 	void update(float deltaTime) override;
 	void draw(cocos2d::Renderer* renderer, const cocos2d::Mat4& transform, uint32_t flags) override;
 
+	void onObjectCellMoved(GameObject* target, int destinationX, int destinationY) override;
 
 	void addObject(GameObject* object);
 	void removeObject(GameObject* object);

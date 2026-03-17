@@ -19,6 +19,11 @@ bool PlayScene::init() {
 	playLayer->addObject(DirtObject::create());
 	playLayer->addObject(DirtObject::create());
 
+	DirtObject* dirt = DirtObject::create();
+	playLayer->addObject(dirt);
+	dirt->setCell(26, 10);
+
+
 	generateSpawnObjects(playLayer);
 
 	return true;
@@ -27,8 +32,8 @@ bool PlayScene::init() {
 void PlayScene::generateSpawnObjects(cocos2d::Node* pln) {
 	PlayLayer* pl = static_cast<PlayLayer*>(pln);
 
-	for (int i = 0; i < 20; i++) {
-		for (int j = 0; j < 20; j++) {
+	for (int i = 0; i < 5; i++) {
+		for (int j = 0; j < 5; j++) {
 			int x = j, y = i;
 
 			GameObject* object = DirtObject::create();

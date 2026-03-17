@@ -83,7 +83,7 @@ private:
 
 	std::vector<ChunkObjectDelegate*> m_objects;
 	cocos2d::CCVec2i m_cellsCount; // cells count per ONE chunk
-	std::vector<Chunk> m_chunks;
+	std::vector<Chunk*> m_chunks;
 	std::map<ChunkObjectDelegate*, Chunk*> m_chunkToObject;
 };
 

@@ -18,6 +18,7 @@ namespace cocos2d {
 		CCVec2i(const CCVec2i& copyObj);
 
 		bool operator==(const CCVec2i& comparable) const;
+		bool operator!=(const CCVec2i& comparable) const;
 	};
 }
 
