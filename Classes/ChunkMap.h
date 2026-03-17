@@ -71,6 +71,8 @@ public:
 
 	std::vector<ChunkObjectDelegate*> getObjects();
 	std::vector<ChunkObjectDelegate*> getObjects(const cocos2d::CCVec2i& chunkCoords);
+
+	std::vector<cocos2d::CCVec2i> getChunks() const;
 private:
 	struct Chunk { // internal structure (container)
 		cocos2d::CCVec2i position;
@@ -82,6 +84,7 @@ private:
 	std::vector<ChunkObjectDelegate*> m_objects;
 	cocos2d::CCVec2i m_cellsCount; // cells count per ONE chunk
 	std::vector<Chunk> m_chunks;
+	std::map<ChunkObjectDelegate*, Chunk*> m_chunkToObject;
 };
 
 

@@ -11,6 +11,7 @@ public:
 
 	bool init() override;
 
+	void generateSpawnObjects(cocos2d::Node* pln);
 };
 
 #endif //!__PLAY_SCENE_H__
