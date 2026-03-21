@@ -642,6 +642,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClInclude Include="..\Classes\AppDelegate.h" />
     <ClInclude Include="..\Classes\CCVec2i.h" />
     <ClInclude Include="..\Classes\GridObject.h" />
+    <ClInclude Include="..\Classes\MineableBlock.h" />
     <ClInclude Include="..\Classes\PlayLayer.h" />
     <ClInclude Include="..\Classes\PlayScene.h" />
     <ClInclude Include="D:\projectscpp\cocos2d\SpaceMiner\proj.win32\main.h" />
@@ -649,6 +650,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClCompile Include="..\Classes\AppDelegate.cpp" />
     <ClCompile Include="..\Classes\CCVec2i.cpp" />
     <ClCompile Include="..\Classes\GridObject.cpp" />
+    <ClCompile Include="..\Classes\MineableBlock.cpp" />
     <ClCompile Include="..\Classes\PlayLayer.cpp" />
     <ClCompile Include="..\Classes\PlayScene.cpp" />
     <ClCompile Include="D:\projectscpp\cocos2d\SpaceMiner\proj.win32\main.cpp" />

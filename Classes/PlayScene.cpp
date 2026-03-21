@@ -1,6 +1,6 @@
 #include "PlayScene.h"
 #include "PlayLayer.h"
-#include "GridObject.h"
+#include "MineableBlock.h"
 
 USING_NS_CC;
 
@@ -17,12 +17,14 @@ bool PlayScene::init() {
 	PlayLayer* playLayer = PlayLayer::create();
 	addChild(playLayer, 0);
 
-	for (int i = 0; i < 10; i++) {
-		GridObject* object = GridObject::create();
+	for (int i = 1; i <= 10; i++) {
+		for (int j = 1; j <= 10; j++) {
+			GridObject* object = MineableBlock::create();
 
-		Vec2i cell(10 + i, 10);
-		object->setCell(cell);
-		playLayer->addObject(object);
+			Vec2i cell(3 + i, 3 + j);
+			object->setCell(cell);
+			playLayer->addObject(object);
+		}
 	}
 
 	return true;

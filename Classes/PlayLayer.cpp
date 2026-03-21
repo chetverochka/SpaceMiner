@@ -78,6 +78,10 @@ cocos2d::Vec2 PlayLayer::getGridStep() {
 void PlayLayer::addObject(GridObject* object) {
 	CCAssert(!m_allObjects.contains(object), "PlayLayer::addObject: can't add attached object twice!");
 	m_allObjects.pushBack(object);
+
+	object->setGridStep(getGridStep());
+	object->setGridOffset(ccp(0, 0));
+
 	addChild(object, -1);
 }
 
@@ -149,62 +153,70 @@ void PlayLayer::ccKeyPressed(CCKey key, Event* event) {
 		break;
 	}
 
-	const int newCellX = targetMoveDirX + m_playerCell.x;
-	const int newCellY = targetMoveDirY + m_playerCell.y;
+	if (targetMoveDirX != 0 || targetMoveDirY != 0) {
+		const int newCellX = targetMoveDirX + m_playerCell.x;
+		const int newCellY = targetMoveDirY + m_playerCell.y;
 
-	const bool cellOccupied = isCellOccupied(Vec2i(newCellX, newCellY));
+		const bool cellOccupied = isCellOccupied(Vec2i(newCellX, newCellY));
 
-	const Vec2 gridStep = getGridStep();
+		const Vec2 gridStep = getGridStep();
 
-	Vec2 absolutePosition;
-	absolutePosition.x = getGridStep().x * newCellX + gridStep.x / 2;
-	absolutePosition.y = getGridStep().y * newCellY + gridStep.y / 2;
+		Vec2 absolutePosition;
+		absolutePosition.x = getGridStep().x * newCellX + gridStep.x / 2;
+		absolutePosition.y = getGridStep().y * newCellY + gridStep.y / 2;
 
-	if (cellOccupied) {
-		const int aimActionTag = 1;
-		const float aimDuration = 0.2f;
-		m_blockAimSprite->stopActionByTag(aimActionTag);
+		if (cellOccupied) {
+			const int aimActionTag = 1;
+			const float aimDuration = 0.2f;
+			m_blockAimSprite->stopActionByTag(aimActionTag);
 
-		CCAction* action = CCSequence::create({
-			CCPlace::create(Vec2(m_playerSprite->getPosition())),
-			CCFadeOut::create(0.f),
-			CCScaleTo::create(0.f, 0.f),
-			CCShow::create(),
-			CCSpawn::create({
-					EaseCubicActionInOut::create(MoveTo::create(aimDuration, absolutePosition)),
-					CCFadeIn::create(aimDuration),
-					CCEaseElasticInOut::create(CCScaleTo::create(aimDuration, 1.f)),
-				}),
-			CCDelayTime::create(2.f),
-			CCSpawn::create({
-					CCFadeOut::create(aimDuration),
-					CCEaseBackIn::create(CCScaleTo::create(aimDuration, 0.f)),
-				}),
-			CCHide::create()
-			});
-		action->setTag(aimActionTag);
+			CCAction* action = CCSequence::create({
+				CCPlace::create(Vec2(m_playerSprite->getPosition())),
+				CCFadeOut::create(0.f),
+				CCScaleTo::create(0.f, 0.f),
+				CCShow::create(),
+				CCSpawn::create({
+						EaseCubicActionInOut::create(MoveTo::create(aimDuration, absolutePosition)),
+						CCFadeIn::create(aimDuration),
+						CCEaseElasticInOut::create(CCScaleTo::create(aimDuration, 1.f)),
+					}),
+				CCDelayTime::create(2.f),
+				CCSpawn::create({
+						CCFadeOut::create(aimDuration),
+						CCEaseBackIn::create(CCScaleTo::create(aimDuration, 0.f)),
+					}),
+				CCHide::create()
+				});
+			action->setTag(aimActionTag);
 
-		m_blockAimSprite->runAction(action);
+			m_blockAimSprite->runAction(action);
 
-		GridObject* overlapObject = getObjectInCell(Vec2i(newCellX, newCellY));
-		if (overlapObject) {
-			overlapObject->onPlayerOverlap();
+			GridObject* overlapObject = getObjectInCell(Vec2i(newCellX, newCellY));
+			if (overlapObject) {
+				GridObject::OverlapContext overlapCtx;
+				overlapCtx.strength = 1;
+
+				const GridObject::OverlapResult result = overlapObject->onPlayerOverlap(overlapCtx);
+				if (result == GridObject::OverlapResult::OBJECT_BREAKED) {
+					removeObject(overlapObject);
+				}
+			}
 		}
-	}
-	else {
-		m_playerCell = Vec2i(newCellX, newCellY);
-		m_playerSprite->stopActionByTag(PLAYER_MOVE_ACTION_TAG);
-		ActionInterval* moveAction = EaseBackInOut::create(MoveTo::create(0.1f, absolutePosition));
-		moveAction->setTag(PLAYER_MOVE_ACTION_TAG);
+		else {
+			m_playerCell = Vec2i(newCellX, newCellY);
+			m_playerSprite->stopActionByTag(PLAYER_MOVE_ACTION_TAG);
+			ActionInterval* moveAction = EaseBackInOut::create(MoveTo::create(0.1f, absolutePosition));
+			moveAction->setTag(PLAYER_MOVE_ACTION_TAG);
 
-		m_playerSprite->runAction(moveAction);
-	}
+			m_playerSprite->runAction(moveAction);
+		}
 
-	m_playerSprite->runAction(CCSequence::create({
-			CCScaleTo::create(0.06f, 1.2f),
-			CCScaleTo::create(0.06f, 1.0f)
-		})
-	);
+		m_playerSprite->runAction(CCSequence::create({
+				CCScaleTo::create(0.06f, 1.2f),
+				CCScaleTo::create(0.06f, 1.0f)
+			})
+		);
+	}
 
 }
 

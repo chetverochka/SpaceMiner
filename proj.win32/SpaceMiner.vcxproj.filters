@@ -22,6 +22,9 @@
     <ClCompile Include="..\Classes\GridObject.cpp">
       <Filter>Source Files\Classes</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\MineableBlock.cpp">
+      <Filter>Source Files\Classes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="D:\projectscpp\cocos2d\SpaceMiner\proj.win32\main.h">
@@ -61,6 +64,9 @@
       <Filter>Source Files\Classes</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\GridObject.h">
+      <Filter>Source Files\Classes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\MineableBlock.h">
       <Filter>Source Files\Classes</Filter>
     </ClInclude>
   </ItemGroup>
