@@ -5,20 +5,20 @@
 #include "deprecated/CCDeprecated.h"
 
 namespace cocos2d {
-	class CCVec2i {
+	class Vec2i {
 	public:
 		int x;
 		int y;
 
-		CCVec2i();
-		CCVec2i(int x, int y);
-		CCVec2i(const cocos2d::CCPoint& vec2f);
-		CCVec2i(const cocos2d::CCSize& size);
-		CCVec2i(int xy);
-		CCVec2i(const CCVec2i& copyObj);
+		Vec2i();
+		Vec2i(int x, int y);
+		Vec2i(const cocos2d::CCPoint& vec2f);
+		Vec2i(const cocos2d::CCSize& size);
+		Vec2i(int xy);
+		Vec2i(const Vec2i& copyObj);
 
-		bool operator==(const CCVec2i& comparable) const;
-		bool operator!=(const CCVec2i& comparable) const;
+		bool operator==(const Vec2i& comparable) const;
+		bool operator!=(const Vec2i& comparable) const;
 	};
 }
 

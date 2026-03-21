@@ -2,14 +2,15 @@
 #define __PLAY_LAYER_H__
 
 #include "cocos2d.h"
-#include "ObjectEventDelegate.h"
-#include "ChunkMap.h"
+#include "CCVec2i.h"
 
 class GameObject;
 class PlayerObject;
 
-class PlayLayer : public cocos2d::CCLayer, public ObjectEventDelegate {
+class PlayLayer : public cocos2d::CCLayer {
 public:
+	static const int PLAYER_MOVE_ACTION_TAG;
+
 	CREATE_FUNC(PlayLayer);
 
 	PlayLayer();
@@ -22,21 +23,21 @@ public:
 	void update(float deltaTime) override;
 	void draw(cocos2d::Renderer* renderer, const cocos2d::Mat4& transform, uint32_t flags) override;
 
-	void onObjectCellMoved(GameObject* target, int destinationX, int destinationY) override;
+	cocos2d::Vec2 getGridStep();
 
-	void addObject(GameObject* object);
-	void removeObject(GameObject* object);
 protected:
-	virtual void drawChunks();
+	virtual void debugDraw();
 	virtual void ccKeyPressed(cocos2d::EventKeyboard::KeyCode key, cocos2d::Event* event);
 	virtual void ccKeyReleased(cocos2d::EventKeyboard::KeyCode key, cocos2d::Event* event);
 private:
-	cocos2d::Vec2 m_gridStep;
-	ChunkMap* m_chunkMap;
-	cocos2d::Vector<GameObject*> m_allObjects;
-	PlayerObject* m_player;
+	cocos2d::CustomCommand m_drawCommand;
 	cocos2d::DrawNode* m_drawCanvas;
-	cocos2d::CustomCommand m_drawChunksCommand;
+	cocos2d::Sprite* m_playerSprite;
+
+	cocos2d::Vec2i m_playerCell;
 };
+
+
+
 
 #endif //!__PLAY_LAYER_H__

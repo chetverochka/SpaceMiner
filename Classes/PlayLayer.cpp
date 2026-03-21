@@ -1,21 +1,16 @@
 #include "PlayLayer.h"
-#include "GameObject.h"
-#include "ChunkMap.h"
-#include "PlayerObject.h"
 
 USING_NS_CC;
 
+const int PlayLayer::PLAYER_MOVE_ACTION_TAG = 1;
+
 PlayLayer::PlayLayer()
-	: m_chunkMap(NULL) // cocos2d-x ruins RAII and i love it lol
-	, m_drawCanvas(NULL)
-	, m_gridStep(Vec2(40,40))
+	: m_drawCanvas(NULL)
+	, m_playerCell(Vec2i(0, 0))
 {}
 
 PlayLayer::~PlayLayer() {
-	if (m_chunkMap) {
-		delete m_chunkMap;
-		m_chunkMap = NULL;
-	}
+
 }
 
 bool PlayLayer::init(){
@@ -36,10 +31,8 @@ bool PlayLayer::init(){
 	}
 	addChild(m_drawCanvas, 0, "draw_canvas");
 
-	m_chunkMap = new ChunkMap();
-
-	m_player = PlayerObject::create();
-	addObject(m_player);
+	m_playerSprite = Sprite::create("PlayerSprite.png");
+	addChild(m_playerSprite, 0);
 
 	return true;
 }
@@ -57,151 +50,83 @@ void PlayLayer::onExit() {
 void PlayLayer::update(float deltaTime) {
 	Layer::update(deltaTime);
 
-	for (int i = 0; i < m_allObjects.size(); i++) {
-		GameObject* object = m_allObjects.at(i);
-		bool selfUpdatable = object->getScheduler()->isScheduled(schedule_selector(GameObject::update), object);
-		if (!selfUpdatable) {
-			object->update(deltaTime);
-		}
-	}
 }
 
 void PlayLayer::draw(cocos2d::Renderer* renderer, const cocos2d::Mat4& transform, uint32_t flags) {
 	Layer::draw(renderer, transform, flags);
 
-	m_drawChunksCommand.init(getGlobalZOrder(), transform, flags);
-	m_drawChunksCommand.func = CC_CALLBACK_0(PlayLayer::drawChunks, this);
-
-	renderer->addCommand(&m_drawChunksCommand);
+	CustomCommand* drawCommand = &m_drawCommand;
+	drawCommand->init(_globalZOrder, transform, flags);
+	drawCommand->func = CC_CALLBACK_0(PlayLayer::debugDraw, this);
+	renderer->addCommand(drawCommand);
 }
 
-void PlayLayer::onObjectCellMoved(GameObject* target, int destinationX, int destinationY) {
-	m_chunkMap->updateObject(target);
+cocos2d::Vec2 PlayLayer::getGridStep() {
+	static const Vec2 gridStep(60.f, 60.f);
+	return gridStep;
 }
 
-
-void PlayLayer::addObject(GameObject* object) {
-	if (m_allObjects.contains(object)) {
-		return;
-	}
-	m_allObjects.pushBack(object);
-
-	object->addEventListener(this);
-
-	if (!object->getParent()) {
-		addChild(object, 0);
-	}
-	m_chunkMap->add(object);
-}
-
-void PlayLayer::removeObject(GameObject* object) {
-	if (!m_allObjects.contains(object)) {
-		return;
-	}
-	m_allObjects.eraseObject(object);
-
-	object->removeEventListener();
-
-	if (object->getParent() == this) {
-		object->removeFromParent();
-	}
-	m_chunkMap->remove(object);
-}
-
-void PlayLayer::drawChunks() {
-	if (!m_drawCanvas) {
-		return;
-	}
-
+void PlayLayer::debugDraw() {
 	m_drawCanvas->clear();
-	
-	std::vector<CCVec2i> chunks = m_chunkMap->getChunks();
-	for (CCVec2i& chunkPos : chunks) {
-		Vec2 chunkSize;
-		chunkSize.x = m_chunkMap->getCellsCount().x * m_gridStep.x;
-		chunkSize.y = m_chunkMap->getCellsCount().y * m_gridStep.y;
 
-		Vec2 origin;
-		origin.x = chunkPos.x * chunkSize.x;
-		origin.y = chunkPos.y * chunkSize.y;
+	const Vec2i playerCell = m_playerCell;
+	const Vec2 gridStep = getGridStep();
 
-		Vec2 destination = origin + chunkSize;
+	Vec2 from, to;
+	from = Vec2(gridStep.x * playerCell.x, gridStep.y * playerCell.y);
+	to = from + gridStep;
 
-		m_drawCanvas->drawRect(origin, destination, Color4F::WHITE);
-
-		Color4F lineColor = Color4F(1, 1, 1, 0.3);
-
-		// vertical lines
-		for (int j = 0; j < m_chunkMap->getCellsCount().x; j++) {
-			Vec2 from, to;
-
-			from.x = origin.x + j * m_gridStep.x + m_gridStep.x;
-			from.y = origin.y;
-
-			to.x = from.x;
-			to.y = destination.y;
-
-			m_drawCanvas->drawLine(from, to, lineColor);
-		}
-
-		// horizontal lines
-		for (int j = 0; j < m_chunkMap->getCellsCount().y; j++) {
-			Vec2 from, to;
-
-			from.x = origin.x;
-			from.y = origin.y + j * m_gridStep.y + m_gridStep.y;
-
-			to.x = destination.x;
-			to.y = from.y;
-
-			m_drawCanvas->drawLine(from, to, lineColor);
-		}
-	}
+	m_drawCanvas->drawRect(from, to, Color4F::WHITE);
+	m_drawCanvas->drawSolidRect(from, to, Color4F(1, 1, 1, 0.2f));
 }
 
-void PlayLayer::ccKeyPressed(EventKeyboard::KeyCode key, Event* event) {
+typedef EventKeyboard::KeyCode CCKey;
+
+void PlayLayer::ccKeyPressed(CCKey key, Event* event) {
 	event->stopPropagation();
 
 	int targetMoveDirX = 0, targetMoveDirY = 0;
-
-	typedef EventKeyboard::KeyCode Key;
 	switch (key) {
 	default:
 		break;
-	case Key::KEY_W:
+	case CCKey::KEY_W:
 		targetMoveDirY = 1;
 		break;
-	case Key::KEY_A:
+	case CCKey::KEY_A:
 		targetMoveDirX = -1;
 		break;
-	case Key::KEY_S:
+	case CCKey::KEY_S:
 		targetMoveDirY = -1;
 		break;
-	case Key::KEY_D:
+	case CCKey::KEY_D:
 		targetMoveDirX = 1;
 		break;
 	}
 
-	m_player->smoothMove(targetMoveDirX, targetMoveDirY);
+	const int newCellX = targetMoveDirX + m_playerCell.x;
+	const int newCellY = targetMoveDirY + m_playerCell.y;
 
-	CCVec2i playerCell(m_player->getCellX(), m_player->getCellY());
-	CCVec2i chunkIndex(m_chunkMap->getChunkCoords(playerCell));
-	CCLOG("Chunk coords for position (%i, %i) = %i, %i;", playerCell.x, playerCell.y, chunkIndex.x, chunkIndex.y);
+	const bool cellOccupied = false;
 
-	if (targetMoveDirX == 0 && targetMoveDirY == 0) {
-		Vector<GameObject*>::iterator it = m_allObjects.end() - 1;
-		while (dynamic_cast<PlayerObject*>(*it) && it != m_allObjects.begin()) {
-			it--;
-		}
+	if (!cellOccupied) {
+		m_playerCell = Vec2i(newCellX, newCellY);
 
-		if (!dynamic_cast<PlayerObject*>(*it)) {
-			removeObject(*it);
-		}
+		const Vec2 gridStep = getGridStep();
+
+		Vec2 newPlayerPosition;
+		newPlayerPosition.x = getGridStep().x * newCellX + gridStep.x / 2;
+		newPlayerPosition.y = getGridStep().y * newCellY + gridStep.y / 2;
+
+		m_playerSprite->stopActionByTag(PLAYER_MOVE_ACTION_TAG);
+
+		ActionInterval* moveAction = EaseBackInOut::create(MoveTo::create(0.1f, newPlayerPosition));
+		moveAction->setTag(PLAYER_MOVE_ACTION_TAG);
+
+		m_playerSprite->runAction(moveAction);
 	}
 }
 
-void PlayLayer::ccKeyReleased(EventKeyboard::KeyCode key, Event* event) {
+void PlayLayer::ccKeyReleased(CCKey key, Event* event) {
 	event->stopPropagation();
-	typedef EventKeyboard::KeyCode Key;
 
 }
