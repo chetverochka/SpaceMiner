@@ -3,6 +3,7 @@
 USING_NS_CC;
 
 const int PlayLayer::PLAYER_MOVE_ACTION_TAG = 1;
+const int PlayLayer::PLAYER_MOVE_ROTATE_ACTION_TAG = 2;
 
 PlayLayer::PlayLayer()
 	: m_drawCanvas(NULL)
@@ -33,6 +34,10 @@ bool PlayLayer::init(){
 
 	m_playerSprite = Sprite::create("PlayerSprite.png");
 	addChild(m_playerSprite, 0);
+
+	m_blockAimSprite = Sprite::create("BlockAim.png");
+	m_blockAimSprite->setVisible(false);
+	addChild(m_blockAimSprite, 0);
 
 	return true;
 }
@@ -76,8 +81,8 @@ void PlayLayer::debugDraw() {
 	from = Vec2(gridStep.x * playerCell.x, gridStep.y * playerCell.y);
 	to = from + gridStep;
 
-	m_drawCanvas->drawRect(from, to, Color4F::WHITE);
-	m_drawCanvas->drawSolidRect(from, to, Color4F(1, 1, 1, 0.2f));
+	//m_drawCanvas->drawRect(from, to, Color4F::WHITE);
+	//m_drawCanvas->drawSolidRect(from, to, Color4F(1, 1, 1, 0.2f));
 }
 
 typedef EventKeyboard::KeyCode CCKey;
@@ -85,45 +90,81 @@ typedef EventKeyboard::KeyCode CCKey;
 void PlayLayer::ccKeyPressed(CCKey key, Event* event) {
 	event->stopPropagation();
 
-	int targetMoveDirX = 0, targetMoveDirY = 0;
+	int targetMoveDirX = 0, targetMoveDirY = 0, targetRotation = 0;
 	switch (key) {
 	default:
 		break;
 	case CCKey::KEY_W:
 		targetMoveDirY = 1;
+		m_playerSprite->setRotation(0);
 		break;
 	case CCKey::KEY_A:
 		targetMoveDirX = -1;
+		m_playerSprite->setRotation(-90);
 		break;
 	case CCKey::KEY_S:
 		targetMoveDirY = -1;
+		targetRotation = -180;
+		m_playerSprite->setRotation(-180);
 		break;
 	case CCKey::KEY_D:
 		targetMoveDirX = 1;
+		m_playerSprite->setRotation(90);
 		break;
 	}
 
 	const int newCellX = targetMoveDirX + m_playerCell.x;
 	const int newCellY = targetMoveDirY + m_playerCell.y;
 
-	const bool cellOccupied = false;
+	const bool cellOccupied = newCellX == 2 && newCellY == 2;
+
+	const Vec2 gridStep = getGridStep();
+
+	Vec2 absolutePosition;
+	absolutePosition.x = getGridStep().x * newCellX + gridStep.x / 2;
+	absolutePosition.y = getGridStep().y * newCellY + gridStep.y / 2;
 
 	if (!cellOccupied) {
 		m_playerCell = Vec2i(newCellX, newCellY);
-
-		const Vec2 gridStep = getGridStep();
-
-		Vec2 newPlayerPosition;
-		newPlayerPosition.x = getGridStep().x * newCellX + gridStep.x / 2;
-		newPlayerPosition.y = getGridStep().y * newCellY + gridStep.y / 2;
-
 		m_playerSprite->stopActionByTag(PLAYER_MOVE_ACTION_TAG);
-
-		ActionInterval* moveAction = EaseBackInOut::create(MoveTo::create(0.1f, newPlayerPosition));
+		ActionInterval* moveAction = EaseBackInOut::create(MoveTo::create(0.1f, absolutePosition));
 		moveAction->setTag(PLAYER_MOVE_ACTION_TAG);
 
 		m_playerSprite->runAction(moveAction);
 	}
+	else {
+		const int aimActionTag = 1;
+		const float aimDuration = 0.2f;
+		m_blockAimSprite->stopActionByTag(aimActionTag);
+
+		CCAction* action = CCSequence::create({
+			CCPlace::create(Vec2(m_playerSprite->getPosition())),
+			CCFadeOut::create(0.f),
+			CCScaleTo::create(0.f, 0.f),
+			CCShow::create(),
+			CCSpawn::create({
+					EaseCubicActionInOut::create(MoveTo::create(aimDuration, absolutePosition)),
+					CCFadeIn::create(aimDuration),
+					CCEaseElasticInOut::create(CCScaleTo::create(aimDuration, 1.f)),
+				}),
+			CCDelayTime::create(2.f),
+			CCSpawn::create({
+					CCFadeOut::create(aimDuration),
+					CCEaseBackIn::create(CCScaleTo::create(aimDuration, 0.f)),
+				}),
+			CCHide::create()
+			});
+		action->setTag(aimActionTag);
+
+		m_blockAimSprite->runAction(action);
+	}
+
+	m_playerSprite->runAction(CCSequence::create({
+			CCScaleTo::create(0.06f, 1.2f),
+			CCScaleTo::create(0.06f, 1.0f)
+		})
+	);
+
 }
 
 void PlayLayer::ccKeyReleased(CCKey key, Event* event) {

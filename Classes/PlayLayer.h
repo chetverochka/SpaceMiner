@@ -10,6 +10,7 @@ class PlayerObject;
 class PlayLayer : public cocos2d::CCLayer {
 public:
 	static const int PLAYER_MOVE_ACTION_TAG;
+	static const int PLAYER_MOVE_ROTATE_ACTION_TAG;
 
 	CREATE_FUNC(PlayLayer);
 
@@ -33,6 +34,7 @@ private:
 	cocos2d::CustomCommand m_drawCommand;
 	cocos2d::DrawNode* m_drawCanvas;
 	cocos2d::Sprite* m_playerSprite;
+	cocos2d::Sprite* m_blockAimSprite;
 
 	cocos2d::Vec2i m_playerCell;
 };
