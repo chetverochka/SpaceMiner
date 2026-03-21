@@ -4,8 +4,8 @@
 #include "cocos2d.h"
 #include "CCVec2i.h"
 
-class GameObject;
 class PlayerObject;
+class GridObject;
 
 class PlayLayer : public cocos2d::CCLayer {
 public:
@@ -26,6 +26,13 @@ public:
 
 	cocos2d::Vec2 getGridStep();
 
+	void addObject(GridObject* object);
+	void removeObject(GridObject* object);
+
+	const cocos2d::Vector<GridObject*>& getObjects();
+
+	bool isCellOccupied(const cocos2d::Vec2i& cell) const;
+	GridObject* getObjectInCell(const cocos2d::Vec2i& cell);
 protected:
 	virtual void debugDraw();
 	virtual void ccKeyPressed(cocos2d::EventKeyboard::KeyCode key, cocos2d::Event* event);
@@ -37,9 +44,7 @@ private:
 	cocos2d::Sprite* m_blockAimSprite;
 
 	cocos2d::Vec2i m_playerCell;
+	cocos2d::Vector<GridObject*> m_allObjects;
 };
-
-
-
 
 #endif //!__PLAY_LAYER_H__

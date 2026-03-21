@@ -1,4 +1,5 @@
 #include "PlayLayer.h"
+#include "GridObject.h"
 
 USING_NS_CC;
 
@@ -8,6 +9,9 @@ const int PlayLayer::PLAYER_MOVE_ROTATE_ACTION_TAG = 2;
 PlayLayer::PlayLayer()
 	: m_drawCanvas(NULL)
 	, m_playerCell(Vec2i(0, 0))
+	, m_playerSprite(NULL)
+	, m_blockAimSprite(NULL)
+	, m_allObjects(Vector<GridObject*>())
 {}
 
 PlayLayer::~PlayLayer() {
@@ -71,6 +75,38 @@ cocos2d::Vec2 PlayLayer::getGridStep() {
 	return gridStep;
 }
 
+void PlayLayer::addObject(GridObject* object) {
+	CCAssert(!m_allObjects.contains(object), "PlayLayer::addObject: can't add attached object twice!");
+	m_allObjects.pushBack(object);
+	addChild(object, -1);
+}
+
+void PlayLayer::removeObject(GridObject* object) {
+	CCAssert(m_allObjects.contains(object), "PlayLayer::addObject: can't remove unattached object!");
+	m_allObjects.eraseObject(object);
+	removeChild(object);
+}
+
+const cocos2d::Vector<GridObject*>& PlayLayer::getObjects() {
+	return m_allObjects;
+}
+
+bool PlayLayer::isCellOccupied(const cocos2d::Vec2i& cell) const {
+	return std::find_if(m_allObjects.begin(), m_allObjects.end(), 
+		[cell](const GridObject* object) {
+			return object->getCell() == cell;
+		}
+	) != m_allObjects.end();
+}
+
+GridObject* PlayLayer::getObjectInCell(const cocos2d::Vec2i& cell) {
+	Vector<GridObject*>::iterator it = std::find_if(m_allObjects.begin(), m_allObjects.end(), [cell](GridObject* object) {
+		return object->getCell() == cell;
+		});
+	return it == m_allObjects.end() ? NULL : *it;
+}
+
+
 void PlayLayer::debugDraw() {
 	m_drawCanvas->clear();
 
@@ -116,7 +152,7 @@ void PlayLayer::ccKeyPressed(CCKey key, Event* event) {
 	const int newCellX = targetMoveDirX + m_playerCell.x;
 	const int newCellY = targetMoveDirY + m_playerCell.y;
 
-	const bool cellOccupied = newCellX == 2 && newCellY == 2;
+	const bool cellOccupied = isCellOccupied(Vec2i(newCellX, newCellY));
 
 	const Vec2 gridStep = getGridStep();
 
@@ -124,15 +160,7 @@ void PlayLayer::ccKeyPressed(CCKey key, Event* event) {
 	absolutePosition.x = getGridStep().x * newCellX + gridStep.x / 2;
 	absolutePosition.y = getGridStep().y * newCellY + gridStep.y / 2;
 
-	if (!cellOccupied) {
-		m_playerCell = Vec2i(newCellX, newCellY);
-		m_playerSprite->stopActionByTag(PLAYER_MOVE_ACTION_TAG);
-		ActionInterval* moveAction = EaseBackInOut::create(MoveTo::create(0.1f, absolutePosition));
-		moveAction->setTag(PLAYER_MOVE_ACTION_TAG);
-
-		m_playerSprite->runAction(moveAction);
-	}
-	else {
+	if (cellOccupied) {
 		const int aimActionTag = 1;
 		const float aimDuration = 0.2f;
 		m_blockAimSprite->stopActionByTag(aimActionTag);
@@ -157,6 +185,19 @@ void PlayLayer::ccKeyPressed(CCKey key, Event* event) {
 		action->setTag(aimActionTag);
 
 		m_blockAimSprite->runAction(action);
+
+		GridObject* overlapObject = getObjectInCell(Vec2i(newCellX, newCellY));
+		if (overlapObject) {
+			overlapObject->onPlayerOverlap();
+		}
+	}
+	else {
+		m_playerCell = Vec2i(newCellX, newCellY);
+		m_playerSprite->stopActionByTag(PLAYER_MOVE_ACTION_TAG);
+		ActionInterval* moveAction = EaseBackInOut::create(MoveTo::create(0.1f, absolutePosition));
+		moveAction->setTag(PLAYER_MOVE_ACTION_TAG);
+
+		m_playerSprite->runAction(moveAction);
 	}
 
 	m_playerSprite->runAction(CCSequence::create({
