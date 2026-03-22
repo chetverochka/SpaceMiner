@@ -1,6 +1,7 @@
 #include "PlayScene.h"
 #include "PlayLayer.h"
 #include "MineableObject.h"
+#include "Matrix.h"
 
 USING_NS_CC;
 
@@ -26,6 +27,8 @@ bool PlayScene::init() {
 			playLayer->addObject(object);
 		}
 	}
+
+	Matrix<int> mat;
 
 	return true;
 }

@@ -25,6 +25,9 @@
     <ClCompile Include="..\Classes\MineableObject.cpp">
       <Filter>Source Files\Classes</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\Matrix.cpp">
+      <Filter>Source Files\Classes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="D:\projectscpp\cocos2d\SpaceMiner\proj.win32\main.h">
@@ -67,6 +70,9 @@
       <Filter>Source Files\Classes</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\MineableObject.h">
+      <Filter>Source Files\Classes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Matrix.h">
       <Filter>Source Files\Classes</Filter>
     </ClInclude>
   </ItemGroup>

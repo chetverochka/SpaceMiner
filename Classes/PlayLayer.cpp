@@ -13,7 +13,9 @@ PlayLayer::PlayLayer()
 	, m_playerSprite(NULL)
 	, m_blockAimSprite(NULL)
 	, m_allObjects(Vector<GridObject*>())
-{}
+{
+	m_allObjects.reserve(2000);
+}
 
 PlayLayer::~PlayLayer() {
 

@@ -642,6 +642,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClInclude Include="..\Classes\AppDelegate.h" />
     <ClInclude Include="..\Classes\CCVec2i.h" />
     <ClInclude Include="..\Classes\GridObject.h" />
+    <ClInclude Include="..\Classes\Matrix.h" />
     <ClInclude Include="..\Classes\MineableObject.h" />
     <ClInclude Include="..\Classes\PlayLayer.h" />
     <ClInclude Include="..\Classes\PlayScene.h" />
@@ -650,6 +651,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClCompile Include="..\Classes\AppDelegate.cpp" />
     <ClCompile Include="..\Classes\CCVec2i.cpp" />
     <ClCompile Include="..\Classes\GridObject.cpp" />
+    <ClCompile Include="..\Classes\Matrix.cpp" />
     <ClCompile Include="..\Classes\MineableObject.cpp" />
     <ClCompile Include="..\Classes\PlayLayer.cpp" />
     <ClCompile Include="..\Classes\PlayScene.cpp" />

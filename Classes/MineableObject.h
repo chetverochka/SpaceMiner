@@ -5,6 +5,8 @@
 
 class MineableObject : public GridObject {
 public:
+	static const float BASE_OBJECT_SCALE;
+
 	enum MineableType {
 		DEFAULT,
 		DIAMOND,
@@ -13,13 +15,21 @@ public:
 		OBSIDIAN
 	};
 
+	struct CreateData {
+		int maxStrength;
+
+	};
+
 	CREATE_FUNC(MineableObject);
 
+	static MineableObject* createWithType(MineableType type);
+	static MineableObject* create(CreateData createData);
 	MineableObject();
 	
+	bool initWithValues(CreateData createData);
 	bool init() override;
 
-	void setMaxStrength(const int maxStrength);
+	//void setMaxStrength(const int maxStrength);
 
 	int getMaxStrength() const;
 	int getEstimatedStrength() const;
