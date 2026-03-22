@@ -1,5 +1,6 @@
 #include "PlayLayer.h"
 #include "GridObject.h"
+#include "MineableObject.h"
 
 USING_NS_CC;
 
@@ -180,7 +181,7 @@ void PlayLayer::ccKeyPressed(CCKey key, Event* event) {
 						CCFadeIn::create(aimDuration),
 						CCEaseElasticInOut::create(CCScaleTo::create(aimDuration, 1.f)),
 					}),
-				CCDelayTime::create(2.f),
+				CCDelayTime::create(0.2f), // 2.f
 				CCSpawn::create({
 						CCFadeOut::create(aimDuration),
 						CCEaseBackIn::create(CCScaleTo::create(aimDuration, 0.f)),
@@ -191,14 +192,11 @@ void PlayLayer::ccKeyPressed(CCKey key, Event* event) {
 
 			m_blockAimSprite->runAction(action);
 
-			GridObject* overlapObject = getObjectInCell(Vec2i(newCellX, newCellY));
-			if (overlapObject) {
-				GridObject::OverlapContext overlapCtx;
-				overlapCtx.strength = 1;
-
-				const GridObject::OverlapResult result = overlapObject->onPlayerOverlap(overlapCtx);
-				if (result == GridObject::OverlapResult::OBJECT_BREAKED) {
-					removeObject(overlapObject);
+			MineableObject* mineableObject = dynamic_cast<MineableObject*>(getObjectInCell(Vec2i(newCellX, newCellY)));
+			if (mineableObject) {
+				mineableObject->mine(1);
+				if (mineableObject->isBroken()) {
+					removeObject(mineableObject);
 				}
 			}
 		}

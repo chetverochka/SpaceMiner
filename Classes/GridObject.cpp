@@ -48,11 +48,6 @@ const Vec2i& GridObject::getCell() const {
 	return m_cell;
 }
 
-GridObject::OverlapResult GridObject::onPlayerOverlap(OverlapContext& context) {
-	CCLOG("Player overlapping object!");
-	return OverlapResult::NONE;
-}
-
 void GridObject::snapToGrid(const Vec2i& cell, const Vec2& gridStep, const Vec2& offset) {
 	Vec2 position;
 	position.x = gridStep.x / 2 + gridStep.x * cell.x + offset.x;

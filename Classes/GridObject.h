@@ -8,16 +8,6 @@ class PlayLayer;
 
 class GridObject : public cocos2d::CCSprite {
 public:
-	enum OverlapResult {
-		NONE,
-		OBJECT_BREAKED
-	};
-
-	struct OverlapContext {
-		int strength;
-
-	};
-
 	CREATE_FUNC(GridObject);
 	GridObject();
 
@@ -29,8 +19,6 @@ public:
 	virtual void setGridOffset(const cocos2d::Vec2& gridOffset);
 
 	const cocos2d::Vec2i& getCell() const;
-
-	virtual OverlapResult onPlayerOverlap(OverlapContext& context);
 protected:
 	void snapToGrid(const cocos2d::Vec2i& cell, const cocos2d::Vec2& gridStep, const cocos2d::Vec2& offset);
 

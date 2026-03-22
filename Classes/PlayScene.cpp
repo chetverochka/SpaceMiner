@@ -1,6 +1,6 @@
 #include "PlayScene.h"
 #include "PlayLayer.h"
-#include "MineableBlock.h"
+#include "MineableObject.h"
 
 USING_NS_CC;
 
@@ -19,7 +19,7 @@ bool PlayScene::init() {
 
 	for (int i = 1; i <= 10; i++) {
 		for (int j = 1; j <= 10; j++) {
-			GridObject* object = MineableBlock::create();
+			GridObject* object = MineableObject::create();
 
 			Vec2i cell(3 + i, 3 + j);
 			object->setCell(cell);
