@@ -22,10 +22,10 @@
     <ClCompile Include="..\Classes\GridObject.cpp">
       <Filter>Source Files\Classes</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\MineableObject.cpp">
+    <ClCompile Include="..\Classes\Matrix.cpp">
       <Filter>Source Files\Classes</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\Matrix.cpp">
+    <ClCompile Include="..\Classes\MIneableObject.cpp">
       <Filter>Source Files\Classes</Filter>
     </ClCompile>
   </ItemGroup>
@@ -69,10 +69,10 @@
     <ClInclude Include="..\Classes\GridObject.h">
       <Filter>Source Files\Classes</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\MineableObject.h">
+    <ClInclude Include="..\Classes\Matrix.h">
       <Filter>Source Files\Classes</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\Matrix.h">
+    <ClInclude Include="..\Classes\MIneableObject.h">
       <Filter>Source Files\Classes</Filter>
     </ClInclude>
   </ItemGroup>

@@ -5,7 +5,7 @@ USING_NS_CC;
 
 GridObject::GridObject() 
 	: m_cell(Vec2i(0,0))
-	//, m_playLayer(NULL)
+	, m_playLayer(NULL)
 {
 }
 
@@ -31,6 +31,9 @@ void GridObject::setCell(const Vec2i& cell) {
 	if (cell != m_cell) {
 		m_cell = cell;
 		snapToGrid(m_cell, m_gridStep, m_gridOffset);
+		if (m_playLayer) {
+			m_playLayer->updateObjectChunk(this);
+		}
 	}
 }
 
@@ -46,6 +49,14 @@ void GridObject::setGridOffset(const cocos2d::Vec2& gridOffset) {
 
 const Vec2i& GridObject::getCell() const {
 	return m_cell;
+}
+
+void GridObject::setPlayLayer(PlayLayer* playLayer) {
+	m_playLayer = playLayer;
+}
+
+PlayLayer* GridObject::getPlayLayer() {
+	return m_playLayer;
 }
 
 void GridObject::snapToGrid(const Vec2i& cell, const Vec2& gridStep, const Vec2& offset) {

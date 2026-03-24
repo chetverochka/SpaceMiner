@@ -28,8 +28,6 @@ bool PlayScene::init() {
 		}
 	}
 
-	Matrix<int> mat;
-
 	return true;
 }
 

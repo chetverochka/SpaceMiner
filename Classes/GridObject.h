@@ -19,12 +19,17 @@ public:
 	virtual void setGridOffset(const cocos2d::Vec2& gridOffset);
 
 	const cocos2d::Vec2i& getCell() const;
+
+	void setPlayLayer(PlayLayer* playLayer);
+	PlayLayer* getPlayLayer();
 protected:
 	void snapToGrid(const cocos2d::Vec2i& cell, const cocos2d::Vec2& gridStep, const cocos2d::Vec2& offset);
 
 	cocos2d::Vec2i m_cell;
 	cocos2d::Vec2 m_gridStep;
 	cocos2d::Vec2 m_gridOffset;
+
+	PlayLayer* m_playLayer;
 };
 
 #endif //!__GRID_OBJECT_H__

@@ -6,6 +6,7 @@ USING_NS_CC;
 
 const int PlayLayer::PLAYER_MOVE_ACTION_TAG = 1;
 const int PlayLayer::PLAYER_MOVE_ROTATE_ACTION_TAG = 2;
+const Vec2i PlayLayer::CHUNK_SIZE = Vec2i(4, 4);
 
 PlayLayer::PlayLayer()
 	: m_drawCanvas(NULL)
@@ -85,6 +86,8 @@ void PlayLayer::addObject(GridObject* object) {
 	object->setGridStep(getGridStep());
 	object->setGridOffset(ccp(0, 0));
 
+	m_chunkToObject[object] = computeChunkForObject(object);
+
 	addChild(object, -1);
 }
 
@@ -92,6 +95,8 @@ void PlayLayer::removeObject(GridObject* object) {
 	CCAssert(m_allObjects.contains(object), "PlayLayer::addObject: can't remove unattached object!");
 	m_allObjects.eraseObject(object);
 	removeChild(object);
+
+	m_chunkToObject.erase(object);
 }
 
 const cocos2d::Vector<GridObject*>& PlayLayer::getObjects() {
@@ -113,6 +118,28 @@ GridObject* PlayLayer::getObjectInCell(const cocos2d::Vec2i& cell) {
 	return it == m_allObjects.end() ? NULL : *it;
 }
 
+void PlayLayer::updateObjectChunk(GridObject* object) {
+	if (!m_allObjects.contains(object) || m_chunkToObject.count(object) < 1)
+		return;
+
+	m_chunkToObject[object] = computeChunkForObject(object);
+}
+
+std::vector<Vec2i> PlayLayer::getActiveChunks() const {
+	std::vector<Vec2i> ret;
+
+	for (auto& i = m_chunkToObject.begin(); i != m_chunkToObject.end(); i++) {
+		Vec2i chunk = i->second;
+		if (std::find_if(ret.begin(), ret.end(), [chunk](Vec2i& c) {
+			return chunk == c;
+			}) == ret.end() ) {
+			ret.push_back(chunk);
+		}
+	}
+
+	return ret;
+}
+
 
 void PlayLayer::debugDraw() {
 	m_drawCanvas->clear();
@@ -120,12 +147,62 @@ void PlayLayer::debugDraw() {
 	const Vec2i playerCell = m_playerCell;
 	const Vec2 gridStep = getGridStep();
 
-	Vec2 from, to;
-	from = Vec2(gridStep.x * playerCell.x, gridStep.y * playerCell.y);
-	to = from + gridStep;
+	// Player Cell draw
+	{
+		Vec2 from, to;
+		from = Vec2(gridStep.x * playerCell.x, gridStep.y * playerCell.y);
+		to = from + gridStep;
 
-	//m_drawCanvas->drawRect(from, to, Color4F::WHITE);
-	//m_drawCanvas->drawSolidRect(from, to, Color4F(1, 1, 1, 0.2f));
+		m_drawCanvas->drawRect(from, to, Color4F::WHITE);
+		m_drawCanvas->drawSolidRect(from, to, Color4F(1, 1, 1, 0.2f));
+	}
+
+	// Chunks draw
+	{
+		const Size chunkSizePx(gridStep.x * CHUNK_SIZE.x, gridStep.y * CHUNK_SIZE.y);
+		const Vec2 chunkOffsetPx(0, 0); // for future
+		std::vector<Vec2i> activeChunks = getActiveChunks();
+
+		for (int i = 0; i < activeChunks.size(); i++) {
+			{
+				Vec2 from, to;
+
+				from.x = chunkSizePx.width * activeChunks[i].x + chunkOffsetPx.x;
+				from.y = chunkSizePx.height * activeChunks[i].y + chunkOffsetPx.y;
+
+				to.x = from.x + chunkSizePx.width;
+				to.y = from.y + chunkSizePx.height;
+
+				m_drawCanvas->drawRect(from, to, Color4F::BLUE);
+				m_drawCanvas->drawSolidRect(from, to, Color4F(0, 0, 1, 0.2f));
+			}
+
+			// vertical lines
+			for (int j = 0; j < CHUNK_SIZE.x - 1; j++) {
+				Vec2 from, to;
+				from.x = j * gridStep.x + gridStep.x + activeChunks[i].x * chunkSizePx.width;
+				from.y = activeChunks[i].y * chunkSizePx.height;
+
+				to.x = from.x;
+				to.y = from.y + chunkSizePx.height;
+
+				m_drawCanvas->drawLine(from, to, Color4F(0, 0, 1, 0.2f));
+			}
+
+			// horizontal lines
+			for (int j = 0; j < CHUNK_SIZE.y - 1; j++) {
+				Vec2 from, to;
+				from.x = activeChunks[i].x * chunkSizePx.width;
+				from.y = activeChunks[i].y * chunkSizePx.height + j * gridStep.y + gridStep.y;
+
+				to.x = from.x + chunkSizePx.width;
+				to.y = from.y;
+
+				m_drawCanvas->drawLine(from, to, Color4F(0, 0, 1, 0.2f));
+			}
+		}
+	}
+
 }
 
 typedef EventKeyboard::KeyCode CCKey;
@@ -223,4 +300,16 @@ void PlayLayer::ccKeyPressed(CCKey key, Event* event) {
 void PlayLayer::ccKeyReleased(CCKey key, Event* event) {
 	event->stopPropagation();
 
+}
+
+Vec2i PlayLayer::computeChunkForObject(GridObject* object) {
+	return computeChunkPos(object->getCell());
+}
+
+
+Vec2i PlayLayer::computeChunkPos(const cocos2d::Vec2i& globalCell) {
+	Vec2i ret;
+	ret.x = (int)std::floorf((float) globalCell.x / CHUNK_SIZE.x );
+	ret.y = (int)std::floorf((float) globalCell.y / CHUNK_SIZE.y );
+	return ret;
 }

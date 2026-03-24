@@ -11,6 +11,7 @@ class PlayLayer : public cocos2d::CCLayer {
 public:
 	static const int PLAYER_MOVE_ACTION_TAG;
 	static const int PLAYER_MOVE_ROTATE_ACTION_TAG;
+	static const cocos2d::Vec2i CHUNK_SIZE;
 
 	CREATE_FUNC(PlayLayer);
 
@@ -33,11 +34,17 @@ public:
 
 	bool isCellOccupied(const cocos2d::Vec2i& cell) const;
 	GridObject* getObjectInCell(const cocos2d::Vec2i& cell);
+
+	void updateObjectChunk(GridObject* object);
+	std::vector<cocos2d::Vec2i> getActiveChunks() const;
 protected:
 	virtual void debugDraw();
 	virtual void ccKeyPressed(cocos2d::EventKeyboard::KeyCode key, cocos2d::Event* event);
 	virtual void ccKeyReleased(cocos2d::EventKeyboard::KeyCode key, cocos2d::Event* event);
 private:
+	cocos2d::Vec2i computeChunkForObject(GridObject* object);
+	cocos2d::Vec2i computeChunkPos(const cocos2d::Vec2i& globalCell);
+
 	cocos2d::CustomCommand m_drawCommand;
 	cocos2d::DrawNode* m_drawCanvas;
 	cocos2d::Sprite* m_playerSprite;
@@ -45,6 +52,8 @@ private:
 
 	cocos2d::Vec2i m_playerCell;
 	cocos2d::Vector<GridObject*> m_allObjects;
+
+	std::map<GridObject*, cocos2d::Vec2i> m_chunkToObject;
 };
 
 #endif //!__PLAY_LAYER_H__
