@@ -14,6 +14,7 @@ bool PlayScene::init() {
 		return false;
 	}
 
+	getDefaultCamera()->setVisible(false);
 
 	PlayLayer* playLayer = PlayLayer::create();
 	addChild(playLayer, 0);

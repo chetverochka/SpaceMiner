@@ -6,7 +6,7 @@ USING_NS_CC;
 
 const int PlayLayer::PLAYER_MOVE_ACTION_TAG = 1;
 const int PlayLayer::PLAYER_MOVE_ROTATE_ACTION_TAG = 2;
-const Vec2i PlayLayer::CHUNK_SIZE = Vec2i(4, 4);
+const Vec2i PlayLayer::CHUNK_SIZE = Vec2i(10, 10);
 
 PlayLayer::PlayLayer()
 	: m_drawCanvas(NULL)
@@ -14,12 +14,13 @@ PlayLayer::PlayLayer()
 	, m_playerSprite(NULL)
 	, m_blockAimSprite(NULL)
 	, m_allObjects(Vector<GridObject*>())
+	, m_camera(NULL)
 {
 	m_allObjects.reserve(2000);
 }
 
 PlayLayer::~PlayLayer() {
-
+	m_camera->release();
 }
 
 bool PlayLayer::init(){
@@ -47,12 +48,27 @@ bool PlayLayer::init(){
 	m_blockAimSprite->setVisible(false);
 	addChild(m_blockAimSprite, 0);
 
+	const Size visibleSize = CCDirector::sharedDirector()->getVisibleSize();
+
+	m_camera = Camera::createOrthographic(visibleSize.width, visibleSize.height, -1024, 1024);
+	if (!m_camera) {
+		return false;
+	}
+	m_camera->retain();
+	addChild(m_camera);
+
+	m_visibleArea.size = visibleSize;
+	m_visibleArea.origin = ccp(0, 0);
+
 	return true;
 }
 
 void PlayLayer::onEnter() {
 	Layer::onEnter();
 	scheduleUpdate();
+
+	Scene* scene = getScene();
+
 }
 
 void PlayLayer::onExit() {
@@ -63,6 +79,9 @@ void PlayLayer::onExit() {
 void PlayLayer::update(float deltaTime) {
 	Layer::update(deltaTime);
 
+	if (isRunning()) {
+		updateCamera(deltaTime);
+	}
 }
 
 void PlayLayer::draw(cocos2d::Renderer* renderer, const cocos2d::Mat4& transform, uint32_t flags) {
@@ -159,49 +178,15 @@ void PlayLayer::debugDraw() {
 
 	// Chunks draw
 	{
-		const Size chunkSizePx(gridStep.x * CHUNK_SIZE.x, gridStep.y * CHUNK_SIZE.y);
-		const Vec2 chunkOffsetPx(0, 0); // for future
 		std::vector<Vec2i> activeChunks = getActiveChunks();
-
 		for (int i = 0; i < activeChunks.size(); i++) {
-			{
-				Vec2 from, to;
-
-				from.x = chunkSizePx.width * activeChunks[i].x + chunkOffsetPx.x;
-				from.y = chunkSizePx.height * activeChunks[i].y + chunkOffsetPx.y;
-
-				to.x = from.x + chunkSizePx.width;
-				to.y = from.y + chunkSizePx.height;
-
-				m_drawCanvas->drawRect(from, to, Color4F::BLUE);
-				m_drawCanvas->drawSolidRect(from, to, Color4F(0, 0, 1, 0.2f));
-			}
-
-			// vertical lines
-			for (int j = 0; j < CHUNK_SIZE.x - 1; j++) {
-				Vec2 from, to;
-				from.x = j * gridStep.x + gridStep.x + activeChunks[i].x * chunkSizePx.width;
-				from.y = activeChunks[i].y * chunkSizePx.height;
-
-				to.x = from.x;
-				to.y = from.y + chunkSizePx.height;
-
-				m_drawCanvas->drawLine(from, to, Color4F(0, 0, 1, 0.2f));
-			}
-
-			// horizontal lines
-			for (int j = 0; j < CHUNK_SIZE.y - 1; j++) {
-				Vec2 from, to;
-				from.x = activeChunks[i].x * chunkSizePx.width;
-				from.y = activeChunks[i].y * chunkSizePx.height + j * gridStep.y + gridStep.y;
-
-				to.x = from.x + chunkSizePx.width;
-				to.y = from.y;
-
-				m_drawCanvas->drawLine(from, to, Color4F(0, 0, 1, 0.2f));
-			}
+			debugDrawChunk(m_drawCanvas, Color4F::BLUE, ccp(0, 0), activeChunks[i].x, activeChunks[i].y);
 		}
 	}
+
+	const Vec2i playerChunk = computeChunkPos(m_playerCell);
+	debugDrawChunk(m_drawCanvas, Color4F::YELLOW, ccp(0, 0), playerChunk.x, playerChunk.y);
+
 
 }
 
@@ -301,6 +286,62 @@ void PlayLayer::ccKeyReleased(CCKey key, Event* event) {
 	event->stopPropagation();
 
 }
+
+void PlayLayer::updateCamera(float deltaTime) {
+	const float zoom = 1.f;
+	const Size size = CCDirector::sharedDirector()->getVisibleSize() * zoom;
+	const Vec2 center = m_playerSprite->getPosition();
+
+	Vec2 targetPosition;
+	targetPosition.x = center.x - size.width / 2;
+	targetPosition.y = center.y - size.height / 2;
+	m_camera->setPosition(targetPosition);
+
+	m_visibleArea.size = size;
+	m_visibleArea.origin = Vec2(center.x - size.width / 2, center.y - size.height / 2);
+}
+
+void PlayLayer::debugDrawChunk(DrawNode* canvas, const Color4F& color, const Vec2& offSet, const int x, const int y) {
+	const Vec2 gridStep = getGridStep();
+	const Size chunkSizePx(gridStep.x * CHUNK_SIZE.x, gridStep.y * CHUNK_SIZE.y);
+	const Color4F fillColor = Color4F(color.r, color.g, color.b, 0.2f);
+
+	Vec2 from, to;
+
+	from.x = chunkSizePx.width * x + offSet.x;
+	from.y = chunkSizePx.height * y + offSet.y;
+
+	to.x = from.x + chunkSizePx.width;
+	to.y = from.y + chunkSizePx.height;
+
+	canvas->drawRect(from, to, color);
+	canvas->drawSolidRect(from, to, fillColor);
+
+	// vertical lines
+	for (int j = 0; j < CHUNK_SIZE.x - 1; j++) {
+		Vec2 from, to;
+		from.x = j * gridStep.x + gridStep.x + x * chunkSizePx.width;
+		from.y = y * chunkSizePx.height;
+
+		to.x = from.x;
+		to.y = from.y + chunkSizePx.height;
+
+		canvas->drawLine(from, to, fillColor);
+	}
+
+	// horizontal lines
+	for (int j = 0; j < CHUNK_SIZE.y - 1; j++) {
+		Vec2 from, to;
+		from.x = x * chunkSizePx.width;
+		from.y = y * chunkSizePx.height + j * gridStep.y + gridStep.y;
+
+		to.x = from.x + chunkSizePx.width;
+		to.y = from.y;
+
+		canvas->drawLine(from, to, fillColor);
+	}
+}
+
 
 Vec2i PlayLayer::computeChunkForObject(GridObject* object) {
 	return computeChunkPos(object->getCell());
