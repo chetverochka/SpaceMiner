@@ -17,15 +17,19 @@ MineableObject* MineableObject::createWithType(MineableObject::MineableType type
 	default:
 	case Type::DEFAULT:
 		createData.maxStrength = 3;
+		frameName = "Stone.png";
 		break;
 	case Type::DIAMOND:
 		createData.maxStrength = 7;
+		frameName = "DiamondOre.png";
 		break;
 	case Type::GOLD:
 		createData.maxStrength = 2;
+		frameName = "GoldenOre.png";
 		break;
 	case Type::COPPER:
 		createData.maxStrength = 4;
+		frameName = "CopperOre.png";
 		break;
 	case Type::OBSIDIAN:
 		createData.maxStrength = 50;
@@ -42,6 +46,7 @@ MineableObject* MineableObject::createWithType(MineableObject::MineableType type
 		object->setSpriteFrame(frameName);
 		break;
 	}
+	object->setMineableType(type);
 
 	return object;
 }
@@ -57,7 +62,7 @@ MineableObject* MineableObject::create(CreateData createData) {
 }
 
 MineableObject::MineableObject()
-
+	: m_mineableType(MineableObject::MineableType::DEFAULT)
 {}
 
 bool MineableObject::initWithValues(MineableObject::CreateData createData) {
@@ -124,6 +129,15 @@ void MineableObject::resetMine() {
 
 bool MineableObject::isBroken() {
 	return m_estimatedStrength <= 0;
+}
+
+void MineableObject::setMineableType(MineableObject::MineableType type) {
+	if (type != m_mineableType) {
+		m_mineableType = type;
+	}
+}
+const MineableObject::MineableType& MineableObject::getMineableType() const {
+	return m_mineableType;
 }
 
 void MineableObject::onMiningInteraction(const int currentStrength, const int maxStrength) {

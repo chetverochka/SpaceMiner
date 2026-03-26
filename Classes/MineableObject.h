@@ -38,11 +38,15 @@ public:
 	void resetMine();
 
 	bool isBroken();
+
+	void setMineableType(MineableObject::MineableType type);
+	const MineableType& getMineableType() const;
 protected:
 	virtual void onMiningInteraction(const int currentStrength, const int maxStrength);
 
 	int m_maxStrength;
 	int m_estimatedStrength;
+	MineableType m_mineableType;
 
 };
 

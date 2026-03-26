@@ -267,6 +267,29 @@ void PlayLayer::ccKeyPressed(CCKey key, Event* event) {
 			if (mineableObject) {
 				mineableObject->mine(1);
 				if (mineableObject->isBroken()) {
+					float addSeconds = 0.f;
+
+					if (mineableObject->getMineableType() == MineableObject::MineableType::DEFAULT) {
+						addSeconds = 0.f;
+					}
+					else {
+						addSeconds = 10.f;
+					}
+
+					if (addSeconds != 0.f) {
+						Label* l = Label::createWithTTF(StringUtils::format("+%.2fs", addSeconds), "fonts/arial.ttf", 20);
+						l->setColor(addSeconds > 0 ? Color3B::YELLOW : Color3B::RED);
+						addChild(l, 20);
+						l->runAction(CCSequence::create({
+							CCPlace::create(mineableObject->getPosition()),
+							CCSpawn::create({
+								CCFadeOut::create(2.f),
+								CCMoveBy::create(2.f, Vec2(0, 70.f))
+								}),
+							CCRemoveSelf::create()
+							}));
+					}
+
 					removeObject(mineableObject);
 				}
 			}
@@ -327,19 +350,28 @@ void PlayLayer::generateChunksInArea(cocos2d::Rect area) {
 			if (wasGenerated)
 				continue;
 
-			Vec2i fromCell, toCell;
+			Vec2i fromCell, toCell; // global cell coords
 			fromCell.x = chunkX * CHUNK_SIZE.x;
 			fromCell.y = chunkY * CHUNK_SIZE.y;
 
-			toCell.x = fromCell.x + CHUNK_SIZE.x;
-			toCell.y = fromCell.y + CHUNK_SIZE.y;
+			toCell.x = fromCell.x + CHUNK_SIZE.x - 1;
+			toCell.y = fromCell.y + CHUNK_SIZE.y - 1;
 
 			for (int cellY = fromCell.y; cellY <= toCell.y; cellY++) {
 				for (int cellX = fromCell.x; cellX <= toCell.x; cellX++) {
 					if (cellX > -3 && cellX < 3 && cellY > -3 && cellY < 3)
 						continue;
 
-					GridObject* object = MineableObject::create();
+					MineableObject::MineableType type;
+
+					if (cellY < 10 && cellY > -10 && cellX % 2 == 0) {
+						type = MineableObject::MineableType::GOLD;
+					}
+					else {
+						type = MineableObject::MineableType::DEFAULT;
+					}
+
+					GridObject* object = MineableObject::createWithType(type);
 					
 					object->setCell(Vec2i(cellX, cellY));
 					addObject(object);
