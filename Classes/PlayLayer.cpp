@@ -1,12 +1,11 @@
 #include "PlayLayer.h"
 #include "GridObject.h"
 #include "MineableObject.h"
-
 USING_NS_CC;
 
 const int PlayLayer::PLAYER_MOVE_ACTION_TAG = 1;
 const int PlayLayer::PLAYER_MOVE_ROTATE_ACTION_TAG = 2;
-const Vec2i PlayLayer::CHUNK_SIZE = Vec2i(10, 10);
+const Vec2i PlayLayer::CHUNK_SIZE = Vec2i(7,7);
 
 PlayLayer::PlayLayer()
 	: m_drawCanvas(NULL)
@@ -15,6 +14,7 @@ PlayLayer::PlayLayer()
 	, m_blockAimSprite(NULL)
 	, m_allObjects(Vector<GridObject*>())
 	, m_camera(NULL)
+	, m_debugDrawMode(true)
 {
 	m_allObjects.reserve(2000);
 }
@@ -80,7 +80,8 @@ void PlayLayer::update(float deltaTime) {
 	Layer::update(deltaTime);
 
 	if (isRunning()) {
-		updateCamera(deltaTime);
+		updateCameraPosition(deltaTime);
+		generateChunksInArea(m_visibleArea);
 	}
 }
 
@@ -163,6 +164,9 @@ std::vector<Vec2i> PlayLayer::getActiveChunks() const {
 void PlayLayer::debugDraw() {
 	m_drawCanvas->clear();
 
+	if (!m_debugDrawMode)
+		return;
+
 	const Vec2i playerCell = m_playerCell;
 	const Vec2 gridStep = getGridStep();
 
@@ -215,6 +219,9 @@ void PlayLayer::ccKeyPressed(CCKey key, Event* event) {
 	case CCKey::KEY_D:
 		targetMoveDirX = 1;
 		m_playerSprite->setRotation(90);
+		break;
+	case CCKey::KEY_G:
+		m_debugDrawMode = !m_debugDrawMode;
 		break;
 	}
 
@@ -287,7 +294,7 @@ void PlayLayer::ccKeyReleased(CCKey key, Event* event) {
 
 }
 
-void PlayLayer::updateCamera(float deltaTime) {
+void PlayLayer::updateCameraPosition(float deltaTime) {
 	const float zoom = 1.f;
 	const Size size = CCDirector::sharedDirector()->getVisibleSize() * zoom;
 	const Vec2 center = m_playerSprite->getPosition();
@@ -299,6 +306,50 @@ void PlayLayer::updateCamera(float deltaTime) {
 
 	m_visibleArea.size = size;
 	m_visibleArea.origin = Vec2(center.x - size.width / 2, center.y - size.height / 2);
+}
+
+void PlayLayer::generateChunksInArea(cocos2d::Rect area) {
+	Vec2i from, to;
+	from = computeChunkPos(area.origin);
+	to = computeChunkPos(Vec2(area.getMaxX(), area.getMaxY()));
+
+	for (int chunkY = from.y; chunkY <= to.y; chunkY++) {
+		for (int chunkX = from.x; chunkX <= to.x; chunkX++) {
+			bool wasGenerated = false;
+
+			for (int i = 0; i < m_generatedChunks.size(); i++) {
+				if (m_generatedChunks[i] == Vec2i(chunkX, chunkY)) {
+					wasGenerated = true;
+					break;
+				}
+			}
+
+			if (wasGenerated)
+				continue;
+
+			Vec2i fromCell, toCell;
+			fromCell.x = chunkX * CHUNK_SIZE.x;
+			fromCell.y = chunkY * CHUNK_SIZE.y;
+
+			toCell.x = fromCell.x + CHUNK_SIZE.x;
+			toCell.y = fromCell.y + CHUNK_SIZE.y;
+
+			for (int cellY = fromCell.y; cellY <= toCell.y; cellY++) {
+				for (int cellX = fromCell.x; cellX <= toCell.x; cellX++) {
+					if (cellX > -3 && cellX < 3 && cellY > -3 && cellY < 3)
+						continue;
+
+					GridObject* object = MineableObject::create();
+					
+					object->setCell(Vec2i(cellX, cellY));
+					addObject(object);
+
+				}
+			}
+
+			m_generatedChunks.push_back(Vec2i(chunkX, chunkY));
+		}
+	}
 }
 
 void PlayLayer::debugDrawChunk(DrawNode* canvas, const Color4F& color, const Vec2& offSet, const int x, const int y) {
@@ -348,9 +399,16 @@ Vec2i PlayLayer::computeChunkForObject(GridObject* object) {
 }
 
 
-Vec2i PlayLayer::computeChunkPos(const cocos2d::Vec2i& globalCell) {
+Vec2i PlayLayer::computeChunkPos(const Vec2i& globalCell) {
 	Vec2i ret;
 	ret.x = (int)std::floorf((float) globalCell.x / CHUNK_SIZE.x );
 	ret.y = (int)std::floorf((float) globalCell.y / CHUNK_SIZE.y );
 	return ret;
+}
+
+Vec2i PlayLayer::computeChunkPos(const Vec2& positionPx) {
+	const Vec2 gridStep = getGridStep();
+	const int cellX = std::floorf(positionPx.x / gridStep.x);
+	const int cellY = std::floorf(positionPx.y / gridStep.y);
+	return computeChunkPos(Vec2i(cellX, cellY));
 }

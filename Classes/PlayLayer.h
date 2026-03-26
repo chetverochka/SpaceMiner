@@ -41,12 +41,15 @@ protected:
 	virtual void debugDraw();
 	virtual void ccKeyPressed(cocos2d::EventKeyboard::KeyCode key, cocos2d::Event* event);
 	virtual void ccKeyReleased(cocos2d::EventKeyboard::KeyCode key, cocos2d::Event* event);
-	virtual void updateCamera(float deltaTime);
+	virtual void updateCameraPosition(float deltaTime);
+	
 private:
+	void generateChunksInArea(cocos2d::Rect area);
 	void debugDrawChunk(cocos2d::DrawNode* canvas, const cocos2d::Color4F& color, const cocos2d::Vec2& offSet, const int x, const int y);
 
 	cocos2d::Vec2i computeChunkForObject(GridObject* object);
 	cocos2d::Vec2i computeChunkPos(const cocos2d::Vec2i& globalCell);
+	cocos2d::Vec2i computeChunkPos(const cocos2d::Vec2& positionPx);
 
 	cocos2d::CustomCommand m_drawCommand;
 	cocos2d::DrawNode* m_drawCanvas;
@@ -60,6 +63,10 @@ private:
 
 	cocos2d::Camera* m_camera;
 	cocos2d::Rect m_visibleArea;
+
+	std::vector<cocos2d::Vec2i> m_generatedChunks;
+
+	bool m_debugDrawMode;
 };
 
 #endif //!__PLAY_LAYER_H__
